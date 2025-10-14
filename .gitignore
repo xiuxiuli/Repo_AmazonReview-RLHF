@@ -52,9 +52,6 @@ cache/
 hf_cache/
 datasets_cache/
 
-# --- Reports & Results ---
-reports/results/
-
 # --- IDE / Editor ---
 .vscode/
 
