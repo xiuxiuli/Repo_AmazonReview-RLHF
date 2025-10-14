@@ -1,0 +1,61 @@
+# --- Python cache & build ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+build/
+dist/
+
+# --- Jupyter / Colab ---
+.ipynb_checkpoints/
+.notebooks_cache/
+*.ipynb_save
+*.ipynb_run
+
+# --- Virtual environments ---
+venv/
+.env/
+.venv/
+ENV/
+env.bak/
+python_env/
+
+# --- Data files ---
+data/raw/
+data/processed/*.csv
+data/processed/*.json
+data/samples/
+*.tsv
+*.gz
+*.zip
+*.tar
+*.tar.gz
+
+# --- Model outputs / checkpoints ---
+checkpoints/
+outputs/
+runs/
+experiments/
+*.bin
+*.pt
+*.ckpt
+*.safetensors
+
+# --- Hugging Face cache ---
+huggingface/
+~/.cache/huggingface/
+.cache/huggingface/
+.cache/
+cache/
+hf_cache/
+datasets_cache/
+
+# --- Reports & Results ---
+reports/results/
+
+# --- IDE / Editor ---
+.vscode/
+
+
