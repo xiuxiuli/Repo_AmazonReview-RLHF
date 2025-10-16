@@ -1,0 +1,16 @@
+dataset:
+  name: "sentence-transformers/amazon-reviews"
+  split: "train"
+  size: 150000
+  output_dir: "data/raw"
+  output_file: "amazon_review_subset.jsonl.gz"
+  num_log_steps: 500000
+  seed: 42
+
+cleaning:
+  min_review_length: 50
+  min_sumary_length: 10
+  max_sumary_length: 200
+  bad_summaries: ["good", "ok", "nice", "great", "bad", "fine", "yes"]
+  output_dir: "data/processed"
+  output_file: "amazon_review_subset_cleaned.jsonl"

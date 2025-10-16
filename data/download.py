@@ -1,27 +1,48 @@
-from datasets import load_dataset
-import pandas as pd
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-def download_data():
+from datasets import load_dataset
+import os, random, json
+from utils import tool
+import gzip
+
+def download_stream_subset(cfg):
+    print("🔹 Loading dataset from HuggingFace ...")
+
     # "title", "review" | split: train
     # 1. download
-    raw_data = load_dataset("sentence-transformers/amazon-reviews")
-    print(raw_data)
-    print("Sample record: ", raw_data["train"][0])
+    ds_cfg = cfg["dataset"]
+    dataset_name = ds_cfg["name"]
+    sample_size = ds_cfg["size"]
+    num_log_steps = ds_cfg["num_log_steps"]
+    output_path = os.path.join(ds_cfg["output_dir"], ds_cfg["output_file"])
 
-    # 2. conver to df
-    df = raw_data["train"].to_pandas()
-    print(f"loaded {len(df):,} rows.")
+    random.seed(ds_cfg["seed"])
 
-    # 3. keep and rename filed
-    df = df[["review", "title"]]
-    df.rename(columns={"review": "review", "title": "summary"})
+    stream= load_dataset(dataset_name, split=ds_cfg["split"], streaming=True)
 
+    reservoir = []
+    for i, example in enumerate(stream):
+        if i < sample_size:
+            reservoir.append(example)
+        else:
+            j = random.randint(0, i)
+            if j < sample_size:
+                reservoir[j] = example
+        if (i + 1) % num_log_steps == 0:
+            print(f"📦 Processed {i+1:,} rows ... reservoir size: {len(reservoir)}")
 
-    return raw_data
+    print(f"✅ Finished sampling {len(reservoir):,} samples from {i+1:,} total records.")
+    
+    os.makedirs(ds_cfg["output_dir"], exist_ok=True)
+    with gzip.open(output_path, "wt", encoding='utf-8') as f:
+        for item in reservoir:
+            json.dump(item, f, ensure_ascii=False)
+            f.write("\n")
 
-def process_data(data):
-    print()
+    print(f"💾 Saved random subset to: {output_path}")
 
 if __name__ == "__main__":
-    raw_data = download_data()
-    processed = process_data(raw_data)
+    path = "config/download_config.yaml"
+    cfg = tool.load_yaml(path)
+    download_stream_subset(cfg)
