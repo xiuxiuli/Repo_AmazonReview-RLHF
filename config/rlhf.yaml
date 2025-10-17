@@ -1,0 +1,16 @@
+stage: "rlhf"
+data:
+  reward_model: "roberta-base"
+model:
+  input_checkpoint: "models/dpo_checkpoint"
+train:
+  epochs: 1
+  batch_size: 2
+  learning_rate: 5e-6
+  ppo_epochs: 3
+  reward_scale: 1.0
+  kl_coef: 0.05
+  eval_steps: 1000
+  save_steps: 2000
+output:
+  dir: "/content/drive/MyDrive/amazon_project/checkpoints/rlhf"

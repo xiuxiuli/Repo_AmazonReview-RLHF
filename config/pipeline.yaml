@@ -1,0 +1,19 @@
+project:
+  name: "amazon_review_summarization"
+  seed: 42
+
+stages:
+  - name: sft
+    config: "config/sft.yaml"
+    output_dir: checkpoints/sft
+    resume: false
+
+  - name: dpo
+    config: "config/dpo.yaml"
+    output_dir: checkpoints/dpo
+    resume: false
+
+  - name: rlhf
+    config: "config/rlhf.yaml"
+    output_dir: checkpoints/rlhf
+    resume: false

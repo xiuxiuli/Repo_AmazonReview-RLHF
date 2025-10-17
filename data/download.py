@@ -10,17 +10,17 @@ def download_stream_subset(cfg):
     print("🔹 Loading dataset from HuggingFace ...")
 
     # "title", "review" | split: train
+    dataset_name = cfg["name"]
+    sample_size = cfg["size"]
+    num_log_steps = cfg["num_log_steps"]
+    output_path = os.path.join(cfg["output_dir"], cfg["output_file"])
+
+    random.seed(cfg["seed"])
+    
     # 1. download
-    ds_cfg = cfg["dataset"]
-    dataset_name = ds_cfg["name"]
-    sample_size = ds_cfg["size"]
-    num_log_steps = ds_cfg["num_log_steps"]
-    output_path = os.path.join(ds_cfg["output_dir"], ds_cfg["output_file"])
+    stream= load_dataset(dataset_name, split=cfg["split"], streaming=True)
 
-    random.seed(ds_cfg["seed"])
-
-    stream= load_dataset(dataset_name, split=ds_cfg["split"], streaming=True)
-
+    # 2. random sampling
     reservoir = []
     for i, example in enumerate(stream):
         if i < sample_size:
@@ -34,7 +34,8 @@ def download_stream_subset(cfg):
 
     print(f"✅ Finished sampling {len(reservoir):,} samples from {i+1:,} total records.")
     
-    os.makedirs(ds_cfg["output_dir"], exist_ok=True)
+    # 3. save
+    os.makedirs(cfg["output_dir"], exist_ok=True)
     with gzip.open(output_path, "wt", encoding='utf-8') as f:
         for item in reservoir:
             json.dump(item, f, ensure_ascii=False)
@@ -43,6 +44,6 @@ def download_stream_subset(cfg):
     print(f"💾 Saved random subset to: {output_path}")
 
 if __name__ == "__main__":
-    path = "config/download_config.yaml"
+    path = "config/data_config.yaml"
     cfg = tool.load_yaml(path)
-    download_stream_subset(cfg)
+    download_stream_subset(cfg["dataset"])

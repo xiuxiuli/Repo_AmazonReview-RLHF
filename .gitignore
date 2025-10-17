@@ -24,9 +24,8 @@ python_env/
 
 # --- Data files ---
 data/raw/
-data/processed/*.csv
-data/processed/*.json
-data/samples/
+data/processed/
+data/split/
 *.tsv
 *.gz
 *.zip
@@ -36,8 +35,6 @@ data/samples/
 # --- Model outputs / checkpoints ---
 checkpoints/
 outputs/
-runs/
-experiments/
 *.bin
 *.pt
 *.ckpt

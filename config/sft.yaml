@@ -1,0 +1,30 @@
+stage: "sft"
+
+data:
+  train_file: "data/split/train.jsonl"
+  val_file: "data/split/val.jsonl"
+
+model:
+  base_model: "facebook/bart-base"
+  tokenizer: "facebook/bart-base"
+  max_input_length: 224     
+  max_output_length: 64
+
+train:
+  epochs: 3
+  batch_size: 8
+  gradient_accumulation_steps: 4
+  learning_rate: 3e-5
+  max_length: 256
+  eval_steps: 1000
+  save_steps: 1000
+  report_to: ["tensorboard"]
+  metrics: ["rouge"]
+  early_stopping:
+    enabled: true
+    patience: 2
+    metric: "eval_rougeL"        # or eval_loss
+    mode: "max"                  
+
+output:
+  dir: "/content/drive/MyDrive/amazon_project/checkpoints/sft"

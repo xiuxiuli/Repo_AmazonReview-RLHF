@@ -1,55 +1,119 @@
+import sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import gzip, re, json, statistics
+from pathlib import Path
+from utils import tool
+
 def clean_text(text: str):
     if not isinstance(text, str):
         return ""
-    text = re.sub(r"<.*?>", " ", text)                 # 去除HTML标签
-    text = re.sub(r"http\S+|www\S+", " ", text)        # 去除URL
-    text = re.sub(r"\s+", " ", text)                   # 多余空格
-    text = re.sub(r"[^\x00-\x7F]+", " ", text)         # 非打印字符
-    text = text.strip()                                # 去除首尾空格
+    text = re.sub(r"<.*?>", " ", text)                 # remove HTML tag
+    text = re.sub(r"http\S+|www\S+", " ", text)        # remove URL
+    text = re.sub(r"\s+", " ", text)                   # remove extra space
+    text = re.sub(r"[^\x00-\x7F]+", " ", text)         # remove non-ascii
+    text = text.strip()                                # trim
     return text
 
-def clean(json){
+def clean_record(record: dict) -> dict:
+    """
+    {'review', 'title'} => {'review', 'summary'}。
+    """
+    review = clean_text(record.get("review", ""))
+    summary = clean_text(record.get("summary", record.get("title", "")))
 
-    # 2. conver to df
-    df = raw_data.to_pandas()
-    print(f"Loaded {len(df):,} rows.")
+    return {"review": review, "summary":summary}
 
-    # 3. rename fileds
-    # df = df[["review", "title"]]
-    df = df.rename(columns={"review": "review", "title": "summary"})
+def clean(cfg):
+    source_file = cfg["source_file"]
+    output_path = os.path.join(cfg["output_dir"], cfg["output_file"])
+    Path(cfg["output_dir"]).mkdir(parents=True, exist_ok=True)
 
-    # 4. remove too long/too short content
-    df = df[df["review"].str.len() > 50]
-    df = df[df["summary"].str.len().between(10, 200)]
+    min_review_len = cfg["min_review_length"]
+    min_summary_len = cfg["min_summary_length"]
+    max_summary_len = cfg["max_summary_length"]
+    bad_summaries = set(cfg.get("bad_summaries", []))
 
-    #print(df["summary"].str.len().describe())
+    count_in, count_out = 0, 0
+    review_lens, summary_lens = [], []
 
-    # 4. remove non-info summary
-    bad_summaries = ["good", "ok", "nice", "great", "bad", "fine", "yes"]
-    df = df[~df["summary"].str.lower().isin(bad_summaries)]
+    drop_stats = {
+                    "json_error": 0,
+                    "empty_review_after_clean": 0,
+                    "empty_summary_after_clean": 0,
+                    "short_review": 0,
+                    "summary_len_out_of_range": 0,
+                    "bad_summary": 0
+                }
 
-    # 4. remove other
-    df["review"] = df["review"].apply(clean_text)
-    df["summary"] = df["summary"].apply(clean_text)
+    with gzip.open(source_file, "rt", encoding="utf-8") as fin, open(output_path, "w", encoding="utf-8") as fout:
+        for line in fin:
+            count_in += 1
 
-    print(f"✅ After cleaning: {len(df):,} samples remaining.")
-    # 统计
-    print("\n📊 Dataset overview:")
-    print(f"Total samples after cleaning: {len(df):,}")
-    print(f"Average review length: {df['review'].str.len().mean():.1f}")
-    print(f"Average summary length: {df['summary'].str.len().mean():.1f}")
+            try: 
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                drop_stats["json_error"] += 1
+                continue
 
-    # 🔹 字符长度分布
-    print("\n📈 Review length stats:")
-    print(df["review"].str.len().describe())
+            cleaned = clean_record(record)
+            
+            review = cleaned["review"]
+            summary = cleaned["summary"]
+            
+            # if empty
+            if not review:
+                drop_stats["empty_review_after_clean"] += 1
+                continue
+            if not summary:
+                drop_stats["empty_summary_after_clean"] += 1
+                continue
 
-    print("\n📈 Summary length stats:")
-    print(df["summary"].str.len().describe())
+            review_len = len(review.split())
+            summary_len = len(summary.split())
+            
+            # len validate
+            if len(review.split()) < min_review_len:
+                drop_stats["short_review"] += 1
+                continue
+            if not (min_summary_len <= len(summary.split()) <= max_summary_len):
+                drop_stats["summary_len_out_of_range"] += 1
+                continue
+            
+            if summary.strip().lower() in bad_summaries:
+                drop_stats["bad_summary"] += 1
+                continue
 
-    if save_jsonl:
-        os.makedirs("data/processed", exist_ok=True)
-        output_path = "data/processed/sft_train_cleaned.jsonl"
-        df.to_json(output_path, orient="records", lines=True, force_ascii=False)
-        print(f"✅ Saved cleaned dataset to: {output_path}")
-    return df
-}
+            # ✅ keep track of lengths for statistics
+            review_lens.append(review_len)
+            summary_lens.append(summary_len)
+            
+            # validated success, write in
+            fout.write(json.dumps(cleaned, ensure_ascii=False) + "\n")
+            count_out += 1
+
+    # statistics - cleaned data
+    kept_ratio = (count_out / count_in) if count_in else 0.0
+    print("\n✅ Cleaning complete")
+    print(f"📦 Input lines: {count_in:,}")
+    print(f"✅ Kept lines : {count_out:,}  (keep ratio: {kept_ratio:.2%})")
+    print("🗑️ Dropped by reason:")
+    for k, v in drop_stats.items():
+        print(f"   - {k}: {v:,}")
+
+    # ✅ data len statistics
+    if review_lens and summary_lens:
+        print("\n📊 Length statistics (kept samples only):")
+        print(f"📝 Avg review length:  {statistics.mean(review_lens):.1f} words")
+        print(f"📝 Avg summary length: {statistics.mean(summary_lens):.1f} words")
+        print(f"📈 Median review length:  {statistics.median(review_lens):.1f}")
+        print(f"📈 Median summary length: {statistics.median(summary_lens):.1f}")
+        print(f"📊 Review length range:  {min(review_lens)} ~ {max(review_lens)}")
+        print(f"📊 Summary length range: {min(summary_lens)} ~ {max(summary_lens)}")
+    
+    print(f"\n💾 Saved cleaned data to: {output_path}")
+
+if __name__ == "__main__":
+    cfg = tool.load_yaml("config/data_config.yaml")
+    clean_cfg = cfg["cleaning"]
+    clean(clean_cfg)
