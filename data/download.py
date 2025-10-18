@@ -17,10 +17,10 @@ def download_stream_subset(cfg):
 
     random.seed(cfg["seed"])
     
-    # 1. download
-    stream= load_dataset(dataset_name, split=cfg["split"], streaming=True)
+    # 1. download full 87.5M
+    stream = load_dataset(dataset_name, split=cfg["split"], streaming=True)
 
-    # 2. random sampling
+    # 2. random sampling 40k
     reservoir = []
     for i, example in enumerate(stream):
         if i < sample_size:

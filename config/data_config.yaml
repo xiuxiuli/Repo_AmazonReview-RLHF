@@ -9,9 +9,9 @@ dataset:
 
 cleaning:
   source_file: "data/raw/amazon_review_subset.jsonl.gz"
-  min_review_length: 30
-  min_summary_length: 10
-  max_summary_length: 200
+  min_review_length: 16
+  min_summary_length: 6
+  max_summary_length: 60
   bad_summaries: ["good", "ok", "nice", "great", "bad", "fine", "yes"]
   output_dir: "data/processed"
   output_file: "amazon_review_subset_cleaned.jsonl"
@@ -28,5 +28,20 @@ partition:
     train: "train.jsonl"
     val: "val.jsonl"
     test: "test.jsonl"
+
+train_subset:
+  source_file: "data/split/train.jsonl"
+  out_dir: "data/split"
+  seed: 42
+  subsets:
+    - name: "20k"
+      size: 20000
+      out_file: "train_20k.jsonl"
+    - name: "50k"
+      size: 50000
+      out_file: "train_50k.jsonl"
+    - name: "100k"
+      size: 100000
+      out_file: "train_100k.jsonl"
 
 
