@@ -9,16 +9,18 @@ import gzip
 def download_stream_subset(cfg):
     print("🔹 Loading dataset from HuggingFace ...")
 
-    # "title", "review" | split: train
-    dataset_name = cfg["name"]
-    sample_size = cfg["size"]
-    num_log_steps = cfg["num_log_steps"]
-    output_path = os.path.join(cfg["output_dir"], cfg["output_file"])
+    subCfg = cfg["dataset"] 
+    output_dir, output_path = tool.get_dir_path(cfg, subCfg)
 
-    random.seed(cfg["seed"])
+    # "title", "review" | split: train
+    dataset_name = subCfg["name"]
+    sample_size = subCfg["size"]
+    num_log_steps = subCfg["num_log_steps"]
+
+    random.seed(subCfg["seed"])
     
     # 1. download full 87.5M
-    stream = load_dataset(dataset_name, split=cfg["split"], streaming=True)
+    stream = load_dataset(dataset_name, split=subCfg["split"], streaming=True)
 
     # 2. random sampling 40k
     reservoir = []
@@ -35,7 +37,6 @@ def download_stream_subset(cfg):
     print(f"✅ Finished sampling {len(reservoir):,} samples from {i+1:,} total records.")
     
     # 3. save
-    os.makedirs(cfg["output_dir"], exist_ok=True)
     with gzip.open(output_path, "wt", encoding='utf-8') as f:
         for item in reservoir:
             json.dump(item, f, ensure_ascii=False)
@@ -46,4 +47,4 @@ def download_stream_subset(cfg):
 if __name__ == "__main__":
     path = "config/data_config.yaml"
     cfg = tool.load_yaml(path)
-    download_stream_subset(cfg["dataset"])
+    download_stream_subset(cfg)

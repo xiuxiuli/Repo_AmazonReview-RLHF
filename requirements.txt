@@ -1,2 +1,16 @@
-transformers-4.57.1
-evaluate-0.4.6
+# Core
+transformers==4.57.1
+torch>=2.1.0
+accelerate>=0.26.0
+
+# Metrics
+evaluate==0.4.6
+rouge-score==0.1.2
+
+# Logging
+tensorboard>=2.13.0
+
+# Dataset and Tokenizer
+datasets>=2.19.0
+sentencepiece>=0.1.99
+protobuf>=3.20.0

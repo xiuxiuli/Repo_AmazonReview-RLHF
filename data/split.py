@@ -8,9 +8,10 @@ from pathlib import Path
 
 def partition(cfg):
     # load config
-    src_file = cfg['source_file']
-    split_ratio = cfg["split_ratio"]
-    Path(cfg["output_dir"]).mkdir(parents=True, exist_ok=True)
+    subCfg = cfg["partition"]
+    
+    src_file = subCfg['source_file']
+    split_ratio = subCfg["split_ratio"]
     
     # load cleaned_data
     open_func = gzip.open if src_file.endswith(".gz") else open
@@ -43,13 +44,14 @@ def partition(cfg):
     print(f"   Test:  {len(test_split):,}  ({test_ratio*100:.1f}%)")
 
     # save splits
-    out_files = cfg["out_files"]
-    out_dir = cfg["output_dir"]
+    root_dir = tool.get_root_dir(cfg)
+    os.makedirs(root_dir, exist_ok=True)
+    out_files = subCfg["out_files"]
 
     save_details = {
-        "train": (train_split, os.path.join(out_dir, out_files["train"])),
-        "val": (val_split, os.path.join(out_dir, out_files["val"])),
-        "test": (test_split, os.path.join(out_dir, out_files["test"]))
+        "train": (train_split, os.path.join(root_dir, subCfg['output_subdir'], out_files["train"])),
+        "val": (val_split, os.path.join(root_dir, subCfg['output_subdir'], out_files["val"])),
+        "test": (test_split, os.path.join(root_dir, subCfg['output_subdir'], out_files["test"]))
     }
 
     for name, (subset, path) in save_details.items():
@@ -68,4 +70,4 @@ def save_jsonl(data, path):
 if __name__ == "__main__":
     path = "config/data_config.yaml"
     cfg = tool.load_yaml(path)
-    partition(cfg["partition"])
+    partition(cfg)

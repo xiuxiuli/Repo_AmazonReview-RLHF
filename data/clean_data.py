@@ -24,15 +24,16 @@ def clean_record(record: dict) -> dict:
 
     return {"review": review, "summary":summary}
 
-def clean(cfg):
-    source_file = cfg["source_file"]
-    output_path = os.path.join(cfg["output_dir"], cfg["output_file"])
-    Path(cfg["output_dir"]).mkdir(parents=True, exist_ok=True)
+def clean(config):
+    subCfg = cfg["cleaning"]
+    output_dir, output_path = tool.get_dir_path(cfg, subCfg)
 
-    min_review_len = cfg["min_review_length"]
-    min_summary_len = cfg["min_summary_length"]
-    max_summary_len = cfg["max_summary_length"]
-    bad_summaries = set(cfg.get("bad_summaries", []))
+    source_file = subCfg["source_file"]
+
+    min_review_len = subCfg["min_review_length"]
+    min_summary_len = subCfg["min_summary_length"]
+    max_summary_len = subCfg["max_summary_length"]
+    bad_summaries = set(subCfg.get("bad_summaries", []))
 
     count_in, count_out = 0, 0
     review_lens, summary_lens = [], []
@@ -115,5 +116,4 @@ def clean(cfg):
 
 if __name__ == "__main__":
     cfg = tool.load_yaml("config/data_config.yaml")
-    clean_cfg = cfg["cleaning"]
-    clean(clean_cfg)
+    clean(cfg)

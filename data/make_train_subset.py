@@ -6,19 +6,21 @@ import json, random, os
 from pathlib import Path
 
 def partition_trainset(cfg):
-    with open(cfg["source_file"], "r", encoding="utf-8") as f:
+    subCfg = cfg["train_subset"]
+    with open(subCfg["source_file"], "r", encoding="utf-8") as f:
         data = [json.loads(line) for line in f]
 
-    random.seed(cfg["seed"])
+    random.seed(subCfg["seed"])
     random.shuffle(data)
 
-    output_dir = Path(cfg["out_dir"])
-    subsets = sorted(cfg["subsets"], key=lambda x:int(x["size"]))
+    subsets = sorted(subCfg["subsets"], key=lambda x:int(x["size"]))
+
+    root_dir = tool.get_root_dir(cfg)
+    output_dir = os.path.join(root_dir, subCfg["output_subdir"])
 
     for sub in subsets:
         size = sub["size"]
         out_path = output_dir / sub["out_file"]
-        out_path.parent.mkdir(parents=True, exist_ok=True)
 
         subset = data[:size]
         with open(out_path, "w", encoding="utf-8") as f:
@@ -30,4 +32,4 @@ def partition_trainset(cfg):
 if __name__ == "__main__":
     path = "config/data_config.yaml"
     cfg = tool.load_yaml(path)
-    partition_trainset(cfg["train_subset"])
+    partition_trainset(cfg)

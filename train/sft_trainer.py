@@ -102,7 +102,12 @@ def run(cfg):
     # ---------------------
     # 7. 训练参数设置
     # ---------------------
-    output_dir = cfg["output"]["dir"]
+    in_colab = "COLAB_GPU" in os.environ or "COLAB_RELEASE_TAG" in os.environ
+
+    if in_colab:
+        output_dir = cfg["output"]["dir_colab"]
+    else:
+        output_dir = cfg["output"]["dir_local"]   # 相对路径即可
     os.makedirs(output_dir, exist_ok=True)
 
     args = Seq2SeqTrainingArguments(
@@ -111,7 +116,7 @@ def run(cfg):
         per_device_train_batch_size=train_cfg["batch_size"],
         num_train_epochs=train_cfg["epochs"],
         gradient_accumulation_steps=train_cfg["gradient_accumulation_steps"],
-        evaluation_strategy=train_cfg["evaluation_strategy"],
+        eval_strategy=train_cfg["evaluation_strategy"],
         eval_steps=train_cfg["eval_steps"],
         save_steps=train_cfg["save_steps"],
         predict_with_generate=True,
@@ -159,7 +164,11 @@ def run(cfg):
     trainer.train()
 
     best_metrics = trainer.state.best_metric
-    print(f"🏆 Best eval metric ({args.metric_for_best_model}): {best_metrics:.2f}")
+    if best_metrics is not None:
+        print(f"🏆 Best eval metric ({args.metric_for_best_model}): {best_metrics:.2f}")
+    else:
+        print("⚠️ No evaluation metric recorded (probably training was interrupted early).")
+
     # ---------------------
     # 11. save model
     # ---------------------
@@ -174,15 +183,18 @@ def run(cfg):
         print("  ├─", f)
 
     # run evaluate for saving final_metrics.json
-    final_metrics = trainer.evaluate()
-    with open(os.path.join(output_dir, "final_metrics.json"), "w") as f:
-        json.dump(final_metrics, f, indent=2)
-    print("📊 Final evaluation metrics saved to final_metrics.json")
+    try:
+        final_metrics = trainer.evaluate()
+        with open(os.path.join(output_dir, "final_metrics.json"), "w") as f:
+            json.dump(final_metrics, f, indent=2)
+        print("📊 Final evaluation metrics saved to final_metrics.json")
+    except Exception as e:
+        print(f"⚠️ Evaluation skipped or failed: {e}")
 
     print("✅ SFT training complete!")
 
     return {
-    "best_metric": best_metrics,
-    "final_metrics": final_metrics,
-    "output_dir": output_dir
-}
+        "best_metric": best_metrics,
+        "final_metrics":  locals().get("final_metrics", {}),
+        "output_dir": output_dir
+    }

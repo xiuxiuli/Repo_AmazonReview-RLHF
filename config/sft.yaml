@@ -29,4 +29,5 @@ train:
     mode: "max"                  
 
 output:
-  dir: "/content/drive/MyDrive/amazon_review_RLHF/models/sft"
+  dir_colab: "/content/drive/MyDrive/amazon_review_RLHF/models/sft"
+  dir_local: "models/sft"

@@ -36,6 +36,6 @@ def main(pipe_cfg):
         print(f"✅ {name.upper()} Complete！\n")
 
 if __name__ == "__main__":
-    path = "config/pipeline.yaml"
+    path = "config/pipeline.yaml"    
     pipe_cfg = tool.load_yaml(path)
     main(pipe_cfg)

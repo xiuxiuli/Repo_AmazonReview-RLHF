@@ -1,37 +1,44 @@
+# =============================
+# global paths
+# =============================
+root:
+    local: "data"
+    colab: "/content/drive/MyDrive/amazon_review_RLHF/data"
+
 dataset:
   name: "sentence-transformers/amazon-reviews"
   split: "train"
   size: 400000
-  output_dir: "data/raw"
+  output_subdir: "raw"
   output_file: "amazon_review_subset.jsonl.gz"
   num_log_steps: 1000000
   seed: 42
 
 cleaning:
-  source_file: "data/raw/amazon_review_subset.jsonl.gz"
+  source_file: "raw/amazon_review_subset.jsonl.gz"
+  output_subdir: "processed"
+  output_file: "amazon_review_subset_cleaned.jsonl"
   min_review_length: 16
   min_summary_length: 6
   max_summary_length: 60
   bad_summaries: ["good", "ok", "nice", "great", "bad", "fine", "yes"]
-  output_dir: "data/processed"
-  output_file: "amazon_review_subset_cleaned.jsonl"
 
 partition:
-  source_file: "data/processed/amazon_review_subset_cleaned.jsonl"
+  source_file: "processed/amazon_review_subset_cleaned.jsonl"
+  output_subdir: "split"
   seed: 42
   split_ratio:
     train: 0.8
     val: 0.1
     test: 0.1
-  output_dir: "data/split"
   out_files:
     train: "train.jsonl"
     val: "val.jsonl"
     test: "test.jsonl"
 
 train_subset:
-  source_file: "data/split/train.jsonl"
-  out_dir: "data/split"
+  source_file: "split/train.jsonl"
+  output_subdir: "split"
   seed: 42
   subsets:
     - name: "20k"
