@@ -35,6 +35,7 @@ data/split/
 # --- Model outputs / checkpoints ---
 checkpoints/
 outputs/
+models/
 *.bin
 *.pt
 *.ckpt
