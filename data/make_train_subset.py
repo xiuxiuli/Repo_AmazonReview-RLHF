@@ -7,7 +7,11 @@ from pathlib import Path
 
 def partition_trainset(cfg):
     subCfg = cfg["train_subset"]
-    with open(subCfg["source_file"], "r", encoding="utf-8") as f:
+
+    root_dir = tool.get_root_dir(cfg)
+    src_path = os.path.join(root_dir, subCfg["source_file"])
+
+    with open(src_path, "r", encoding="utf-8") as f:
         data = [json.loads(line) for line in f]
 
     random.seed(subCfg["seed"])
@@ -15,12 +19,12 @@ def partition_trainset(cfg):
 
     subsets = sorted(subCfg["subsets"], key=lambda x:int(x["size"]))
 
-    root_dir = tool.get_root_dir(cfg)
     output_dir = os.path.join(root_dir, subCfg["output_subdir"])
+    os.makedirs(output_dir, exist_ok=True)
 
     for sub in subsets:
         size = sub["size"]
-        out_path = output_dir / sub["out_file"]
+        out_path = os.path.join(output_dir, sub["out_file"])
 
         subset = data[:size]
         with open(out_path, "w", encoding="utf-8") as f:
