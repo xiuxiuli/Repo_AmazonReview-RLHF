@@ -8,6 +8,7 @@ from transformers import (
 )
 from evaluate import load as load_metric
 from utils import tool
+from transformers.trainer_utils import get_last_checkpoint
 
 def set_seed(seed):
     random.seed(seed)           # python
@@ -137,7 +138,7 @@ def run(cfg):
         save_steps=train_cfg["save_steps"],
         predict_with_generate=True,
         logging_dir=os.path.join(checkpoint_dir, "logs"),
-        logging_steps=500,
+        logging_steps=train_cfg["logging_steps"],
         report_to=train_cfg.get("report_to", ["tensorboard"]),
         load_best_model_at_end=True,
         metric_for_best_model=train_cfg["early_stopping"]["metric"]
@@ -179,7 +180,13 @@ def run(cfg):
     print(f"💻 Training on {device.upper()}")
 
     print("🚀 Start SFT training ...")
-    trainer.train()
+    last_ckpt = get_last_checkpoint(checkpoint_dir)
+    if last_ckpt:
+        print(f"🔍 Found checkpoint: {last_ckpt}")
+        trainer.train(resume_from_checkpoint=last_ckpt)
+    else:
+        print("🚀 Starting training from scratch")
+        trainer.train()
 
     best_metrics = trainer.state.best_metric
     if best_metrics is not None:
