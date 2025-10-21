@@ -12,6 +12,7 @@ model:
   max_output_len: 64
 
 train:
+  checkpoint_dir: "checkpoints/sft"
   epochs: 3
   batch_size: 8
   gradient_accumulation_steps: 4

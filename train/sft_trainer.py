@@ -107,16 +107,11 @@ def run(cfg):
     # ---------------------
     # 7. 训练参数设置
     # ---------------------
-    in_colab = "COLAB_GPU" in os.environ or "COLAB_RELEASE_TAG" in os.environ
-
-    if in_colab:
-        output_dir = cfg["output"]["dir_colab"]
-    else:
-        output_dir = cfg["output"]["dir_local"]   # 相对路径即可
-    os.makedirs(output_dir, exist_ok=True)
+    checkpoint_dir = os.path.join(root_dir, train_cfg["checkpoint_dir"])
+    os.makedirs(checkpoint_dir, exist_ok=True)
 
     args = Seq2SeqTrainingArguments(
-        output_dir=output_dir,
+        output_dir=checkpoint_dir,
         learning_rate=train_cfg["learning_rate"],
         per_device_train_batch_size=train_cfg["batch_size"],
         num_train_epochs=train_cfg["epochs"],
@@ -125,8 +120,8 @@ def run(cfg):
         eval_steps=train_cfg["eval_steps"],
         save_steps=train_cfg["save_steps"],
         predict_with_generate=True,
-        logging_dir=os.path.join(output_dir, "logs"),
-        logging_steps=100,
+        logging_dir=os.path.join(checkpoint_dir, "logs"),
+        logging_steps=500,
         report_to=train_cfg.get("report_to", ["tensorboard"]),
         load_best_model_at_end=True,
         metric_for_best_model=train_cfg["early_stopping"]["metric"]
@@ -136,6 +131,8 @@ def run(cfg):
         resume_from_checkpoint=True,
         save_total_limit=2,
         fp16=True,
+        disable_tqdm=True,
+        log_level="error"
     )
 
     # ---------------------
@@ -177,6 +174,14 @@ def run(cfg):
     # ---------------------
     # 11. save model
     # ---------------------
+    in_colab = "COLAB_GPU" in os.environ or "COLAB_RELEASE_TAG" in os.environ
+
+    if in_colab:
+        output_dir = cfg["output"]["dir_colab"]
+    else:
+        output_dir = cfg["output"]["dir_local"]   # 相对路径即可
+    os.makedirs(output_dir, exist_ok=True)
+
     print(f"💾 Saving best model to {output_dir}")
     trainer.save_model(output_dir)
     if not os.path.exists(os.path.join(output_dir, "tokenizer_config.json")):
