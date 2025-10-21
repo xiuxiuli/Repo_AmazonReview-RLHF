@@ -7,6 +7,7 @@ from transformers import (
     DataCollatorForSeq2Seq, EarlyStoppingCallback
 )
 from evaluate import load as load_metric
+from utils import tool
 
 def set_seed(seed):
     random.seed(seed)           # python
@@ -31,8 +32,12 @@ def run(cfg):
     # ---------------------
     # 2. load cleaned data
     # ---------------------
-    train_data = load_dataset("json", data_files=cfg["data"]["train_set"])["train"]
-    val_data = load_dataset("json", data_files=cfg["data"]["val_set"])["train"]
+    root_dir = tool.get_root_dir(cfg)
+    train_file = os.path.join(root_dir,cfg["data"]["train_set"] )
+    val_file = os.path.join(root_dir, cfg["data"]["val_set"])
+
+    train_data = load_dataset("json", data_files=train_file)["train"]
+    val_data = load_dataset("json", data_files=val_file)["train"]
     print(f"✅ Train samples: {len(train_data):,} | Val samples: {len(val_data):,}")
 
     # ---------------------
