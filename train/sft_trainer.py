@@ -156,8 +156,7 @@ def run(cfg):
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
-        predict_with_generate=True,
-        processing_class=tokenizer
+        predict_with_generate=True
     )
 
     # ---------------------
