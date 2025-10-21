@@ -26,6 +26,7 @@ def clean_record(record: dict) -> dict:
 
 def clean(config):
     subCfg = cfg["cleaning"]
+    root_dir = tool.get_root_dir(config)
     output_dir, output_path = tool.get_dir_path(cfg, subCfg)
 
     source_file = subCfg["source_file"]
@@ -46,8 +47,10 @@ def clean(config):
                     "summary_len_out_of_range": 0,
                     "bad_summary": 0
                 }
+    
+    src_path = os.path.join(root_dir, source_file)
 
-    with gzip.open(source_file, "rt", encoding="utf-8") as fin, open(output_path, "w", encoding="utf-8") as fout:
+    with gzip.open(src_path , "rt", encoding="utf-8") as fin, open(output_path, "w", encoding="utf-8") as fout:
         for line in fin:
             count_in += 1
 
