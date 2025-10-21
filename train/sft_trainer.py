@@ -101,11 +101,17 @@ def run(cfg):
         if isinstance(preds, tuple):
             preds = preds[0]
 
+        # ✅ 确保是 numpy 数组
+        preds = np.array(preds)
+        labels = np.array(labels)
+
+        # ✅ 去掉溢出或非法值
+        preds = np.nan_to_num(preds)                # 处理 nan / inf
+        preds = np.clip(preds, 0, tokenizer.vocab_size - 1).astype(np.int32)
+
         labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
 
-        # 转成 int32 避免 int64 溢出
-        preds = preds.astype(np.int32)
-        labels = labels.astype(np.int32)
+        labels = np.clip(labels, 0, tokenizer.vocab_size - 1).astype(np.int32)
 
         decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True) # reverse to text. skip <pad>、<s>、</s>
         decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
@@ -140,7 +146,7 @@ def run(cfg):
         greater_is_better=train_cfg["early_stopping"].get("mode", "max") == "max",   
         resume_from_checkpoint=True,
         save_total_limit=2,
-        fp16=True,
+        fp16=False,
         disable_tqdm=True,
         log_level="error"
     )
