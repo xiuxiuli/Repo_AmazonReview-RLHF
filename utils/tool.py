@@ -2,20 +2,30 @@ import yaml
 from pathlib import Path
 import os
 
-def load_yaml(path: str):
+def load_yaml(path: str, with_global=True):
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"Config file not found: {path}")
     
     with open(path, "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
+        cfg = yaml.safe_load(f) or {}
 
-    return config
+    if with_global:
+        global_path = Path("config/global.yaml")
+
+        if global_path.exists():
+            with open(global_path, "r", encoding="utf-8") as f:
+                global_cfg = yaml.safe_load(f) or {}
+                cfg["global"] = global_cfg
+        else:
+            print("⚠️ global.yaml not found, skip global merge")
+
+    return cfg
 
 def get_root_dir(cfg): 
     if "COLAB_GPU" in os.environ or "COLAB_RELEASE_TAG" in os.environ:
-        root_dir = cfg["root"]["colab"]
-    else: root_dir = cfg["root"]["local"]
+        root_dir = cfg["global"]["root"]["colab"]
+    else: root_dir = cfg["global"]["root"]["local"]
     print(f"📁 Root dir set to: {root_dir}")
     return root_dir
 

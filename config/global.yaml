@@ -1,0 +1,3 @@
+root:
+    local: "."
+    colab: "/content/drive/MyDrive/amazon_review_RLHF"

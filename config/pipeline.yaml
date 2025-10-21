@@ -1,3 +1,4 @@
+
 project:
   name: "amazon_review_summarization"
   seed: 42
@@ -5,15 +6,15 @@ project:
 stages:
   - name: sft
     config: "config/sft.yaml"
-    output_dir: checkpoints/sft
+    output_dir: "models/sft"
     resume: false
 
   - name: dpo
     config: "config/dpo.yaml"
-    output_dir: checkpoints/dpo
+    output_dir: "models/dpo"
     resume: false
 
   - name: rlhf
     config: "config/rlhf.yaml"
-    output_dir: checkpoints/rlhf
+    output_dir: "models/rlhf"
     resume: false

@@ -46,5 +46,5 @@ def download_stream_subset(cfg):
 
 if __name__ == "__main__":
     path = "config/data_config.yaml"
-    cfg = tool.load_yaml(path)
+    cfg = tool.load_yaml(path, True)
     download_stream_subset(cfg)
