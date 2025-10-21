@@ -9,20 +9,21 @@ from pathlib import Path
 def partition(cfg):
     # load config
     subCfg = cfg["partition"]
-    
-    src_file = subCfg['source_file']
+    root_dir = tool.get_root_dir(cfg)
+    src_path = os.path.join(root_dir, subCfg["source_file"])
+
     split_ratio = subCfg["split_ratio"]
     
     # load cleaned_data
-    open_func = gzip.open if src_file.endswith(".gz") else open
-    with open_func(src_file, "rt", encoding="utf-8") as f:
+    open_func = gzip.open if src_path.endswith(".gz") else open
+    with open_func(src_path, "rt", encoding="utf-8") as f:
         data = [json.loads(line) for line in tqdm(f, desc="Reading lines", unit="lines")]
 
     n_total = len(data)
     print(f"✅ Total loaded samples: {n_total:,}")
 
     # shuffle 
-    random.seed(cfg["seed"])
+    random.seed(subCfg["seed"])
     random.shuffle(data)
 
     # compute split size
@@ -44,8 +45,7 @@ def partition(cfg):
     print(f"   Test:  {len(test_split):,}  ({test_ratio*100:.1f}%)")
 
     # save splits
-    root_dir = tool.get_root_dir(cfg)
-    os.makedirs(root_dir, exist_ok=True)
+    os.makedirs(os.path.join(root_dir, subCfg["output_subdir"]), exist_ok=True)
     out_files = subCfg["out_files"]
 
     save_details = {
