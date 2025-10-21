@@ -97,6 +97,16 @@ def run(cfg):
 
     def compute_metrics(eval_pred):
         preds, labels = eval_pred
+
+        if isinstance(preds, tuple):
+            preds = preds[0]
+
+        labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+
+        # 转成 int32 避免 int64 溢出
+        preds = preds.astype(np.int32)
+        labels = labels.astype(np.int32)
+
         decoded_preds = tokenizer.batch_decode(preds, skip_special_tokens=True) # reverse to text. skip <pad>、<s>、</s>
         decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
@@ -146,6 +156,8 @@ def run(cfg):
         tokenizer=tokenizer,
         data_collator=data_collator,
         compute_metrics=compute_metrics,
+        predict_with_generate=True,
+        processing_class=tokenizer
     )
 
     # ---------------------
