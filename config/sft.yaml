@@ -15,7 +15,8 @@ train:
   epochs: 3
   batch_size: 8
   gradient_accumulation_steps: 4
-  learning_rate: 3e-5
+  # learning_rate: 3e-5
+  learning_rate: 0.00003
   max_length: 256
   eval_steps: 1000
   save_steps: 1000
