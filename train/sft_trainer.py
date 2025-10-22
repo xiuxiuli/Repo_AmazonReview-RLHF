@@ -118,8 +118,16 @@ def run(cfg):
         decoded_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
 
         result = metric.compute(predictions=decoded_preds, references=decoded_labels, use_stemmer=True)
-        result = {k: round(v.mid.fmeasure * 100, 2) for k, v in result.items()}
-        return result
+        fixed_result = {}
+        for k, v in result.items():
+            if hasattr(v, "mid"):  # 旧格式 (object)
+                fixed_result[k] = round(v.mid.fmeasure * 100, 2)
+            else:                  # 新格式 (float)
+                fixed_result[k] = round(v * 100, 2)
+
+        return fixed_result
+        # result = {k: round(v.mid.fmeasure * 100, 2) for k, v in result.items()}
+        # return result
     
     # ---------------------
     # 7. 训练参数设置
