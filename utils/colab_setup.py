@@ -11,3 +11,13 @@
 
 # !python ./data/download.py
 
+#  Ctrl + Shift + I
+# function stayAwake() {
+#   console.log("⚙️ Anti-idle script started");
+#   setInterval(() => {
+#     console.log("💡 Still active");
+#     // 模拟一次轻微点击或输入事件
+#     document.querySelector("colab-toolbar-button")?.click();
+#   }, 60000);  // 每分钟触发一次
+# }
+# stayAwake();
