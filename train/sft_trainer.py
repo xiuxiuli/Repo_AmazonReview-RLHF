@@ -189,13 +189,19 @@ def run(cfg):
     print(f"💻 Training on {device.upper()}")
 
     print("🚀 Start SFT training ...")
-    last_ckpt = get_last_checkpoint(checkpoint_dir)
+
+    last_ckpt = train_cfg.get("resume_from_checkpoint", None)
     if last_ckpt:
-        print(f"🔍 Found checkpoint: {last_ckpt}")
+        print(f"🔍 Loading checkpoint manually from: {last_ckpt}")
         trainer.train(resume_from_checkpoint=last_ckpt)
     else:
-        print("🚀 Starting training from scratch")
-        trainer.train()
+        last_ckpt = get_last_checkpoint(checkpoint_dir)
+        if last_ckpt:
+            print(f"🔍 Found checkpoint: {last_ckpt}")
+            trainer.train(resume_from_checkpoint=last_ckpt)
+        else:
+            print("🚀 Starting training from scratch")
+            trainer.train()
 
     best_metrics = trainer.state.best_metric
     if best_metrics is not None:

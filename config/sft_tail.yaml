@@ -12,6 +12,7 @@ model:
   max_output_len: 64
 
 train:
+  resume_from_checkpoint: "checkpoints/sft/checkpoint-1875"
   checkpoint_dir: "checkpoints/sft_tail"           # ✅ 新实验文件夹
   epochs: 1
   batch_size: 8
