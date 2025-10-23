@@ -157,7 +157,8 @@ def run(cfg):
         save_total_limit=2,
         fp16=False,
         disable_tqdm=True,
-        log_level="error"
+        log_level="error",
+        label_smoothing_factor=train_cfg["label_smoothing_factor"]
     )
 
     # ---------------------
