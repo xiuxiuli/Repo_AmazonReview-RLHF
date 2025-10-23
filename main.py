@@ -27,12 +27,12 @@ def main(pipe_cfg):
             
         print(f"\n 🚀 Start stage - {name.upper()}")
 
-        if name == "sft":
+        if name.startswith("sft"):
             sft_trainer.run(cfg)
         elif name == "dpo":
             dpo_trainer.run(cfg)
         elif name == "rlhf":
-            rlhf_trainer
+            rlhf_trainer.run(cfg)
 
         mark_done(output_dir)
 

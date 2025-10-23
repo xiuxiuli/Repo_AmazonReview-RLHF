@@ -1,0 +1,36 @@
+stage: "sft_tail"
+seed: 42
+
+data:
+  train_set: "data/split/train_20k.jsonl"
+  val_set: "data/split/val.jsonl"
+
+model:
+  base_model: "checkpoints/sft/checkpoint-1875"   # ✅ 从上次最佳点加载
+  tokenizer: "facebook/bart-base"
+  max_input_len: 224
+  max_output_len: 64
+
+train:
+  checkpoint_dir: "checkpoints/sft_tail"           # ✅ 新实验文件夹
+  epochs: 1
+  batch_size: 8
+  gradient_accumulation_steps: 4
+  learning_rate: 0.00001                              # ✅ 小步学习
+  max_length: 256
+  eval_steps: 200
+  save_steps: 200
+  logging_steps: 100
+  evaluation_strategy: "steps"
+  report_to: ["tensorboard"]
+  metrics: ["rouge"]
+  label_smoothing_factor: 0.05                     # ✅ 稍微平滑一点
+  early_stopping:
+    enabled: true
+    patience: 1
+    metric: "eval_rougeL"
+    mode: "max"
+
+output:
+  dir_colab: "/content/drive/MyDrive/amazon_review_RLHF/models/sft_tail"
+  dir_local: "models/sft_tail"

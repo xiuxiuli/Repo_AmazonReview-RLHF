@@ -7,14 +7,15 @@ stages:
   - name: sft
     config: "config/sft.yaml"
     output_dir: "models/sft"
-    resume: false
+
+  - name: sft_tail             # ✅ 新增续训阶段
+    config: "config/sft_tail.yaml"
+    output_dir: "models/sft_tail"
 
   - name: dpo
     config: "config/dpo.yaml"
     output_dir: "models/dpo"
-    resume: false
 
   - name: rlhf
     config: "config/rlhf.yaml"
     output_dir: "models/rlhf"
-    resume: false
