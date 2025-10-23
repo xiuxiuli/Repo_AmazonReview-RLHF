@@ -14,7 +14,7 @@ model:
 train:
   resume_from_checkpoint: "checkpoints/sft/checkpoint-1875"
   checkpoint_dir: "checkpoints/sft_tail"           # ✅ 新实验文件夹
-  epochs: 1
+  epochs: 4
   batch_size: 8
   gradient_accumulation_steps: 4
   learning_rate: 0.00001                              # ✅ 小步学习
