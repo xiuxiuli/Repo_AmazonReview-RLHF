@@ -6,7 +6,7 @@ data:
   val_set: "data/split/val.jsonl"
 
 model:
-  base_model: "checkpoints/sft/checkpoint-1875"   # ✅ 从上次最佳点加载
+  base_model: "checkpoints/sft_tail/checkpoint-2400"   # ✅ 从上次最佳点加载
   tokenizer: "facebook/bart-base"
   max_input_len: 224
   max_output_len: 64
