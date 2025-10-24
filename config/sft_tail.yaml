@@ -6,13 +6,13 @@ data:
   val_set: "data/split/val.jsonl"
 
 model:
-  base_model: "checkpoints/sft_tail/checkpoint-2400"   # ✅ 从上次最佳点加载
+  base_model: "checkpoints/sft_tail/checkpoint-2500"   # ✅ 从上次最佳点加载
   tokenizer: "facebook/bart-base"
   max_input_len: 224
   max_output_len: 64
 
 train:
-  resume_from_checkpoint: "checkpoints/sft_tail/checkpoint-2400"
+  resume_from_checkpoint: "checkpoints/sft_tail/checkpoint-2500"
   checkpoint_dir: "checkpoints/sft_tail"           # ✅ 新实验文件夹
   epochs: 6
   batch_size: 8
