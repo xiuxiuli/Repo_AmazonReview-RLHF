@@ -12,9 +12,9 @@ model:
   max_output_len: 64
 
 train:
-  resume_from_checkpoint: true
+  resume_from_checkpoint: "checkpoints/sft_tail/checkpoint-2400"
   checkpoint_dir: "checkpoints/sft_tail"           # ✅ 新实验文件夹
-  epochs: 4
+  epochs: 6
   batch_size: 8
   gradient_accumulation_steps: 4
   learning_rate: 0.00001                              # ✅ 小步学习
